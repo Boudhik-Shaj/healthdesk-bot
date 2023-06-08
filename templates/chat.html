@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health Helpdesk Chatbot</title>
+    <style>
+         body {
+            font-family: Arial, sans-serif;
+            background-color: #7d7f9c;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-header {
+        background-color: #f1f1f1;
+        padding: 10px;
+        text-align: center;
+        }
+        .chat-maincontainer {
+      max-width: calc(100% - 400px);
+      margin: 20px auto;
+      background-color: #6d7cae;
+      /* height: 600px; */
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+        #chat-container {
+            display: flex;
+            flex-direction: row;
+            max-width: flex;
+            margin: 20px auto;
+            background-color: #6d7cae;
+
+        }
+
+        #user-messages {
+            flex-grow: 1;
+            padding: 10px;
+            background-color: #6d7cae;
+        }
+
+        #chatbot-messages {
+            flex-grow: 2;
+            padding: 10px;
+            background-color: #e9e9e9;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .chatbot-message {
+            text-align: left;
+            padding: 8px;
+            border-radius: 5px;
+            /* max-width: 70%; */
+            background-color: #6effee;
+        }
+        .user-message {
+            text-align: right;
+            padding: 8px;
+            border-radius: 5px;
+            /* max-width: 70%; */
+            display: block;
+            align-self: flex-end;
+            background-color: #ffb9b9;
+        }
+        .chat-button {
+            padding: 5px 10px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 3px;
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+        }
+        .chat-button:hover {
+            background-color: #287d29;
+        }
+        .chat-fobar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* max-width: flex; */
+            margin: 20px auto;
+
+            background-color:#6d7cae;
+            /* background-color: #f1f1f1; */
+        }
+        .chat-foheader {
+            text-align: center;
+            /* padding: 10px; */
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-maincontainer">
+        <div class="chat-header">
+            <h1>Health Helpdesk Chatbot</h1>
+        </div>
+    <div id="chat-container">
+        <div id="user-messages"></div>
+        <!-- <div id="chatbot-messages"></div> -->
+    </div>
+
+
+    <h3 class="chat-foheader">Enter your health condition and severity:</h3>
+
+    <div class="chat-fobar">
+
+    <form id="chat-form">
+        <label for="condition">I have a </label>
+        <select name="severity" id="severity-select">
+          <option value="" disabled selected>Select a condition</option>
+          {% for severity in severity %}
+          <option value="{{ severity }}">{{ severity }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="condition" id="condition-select">
+          <option value="" disabled selected>Select a condition</option>
+          {% for condition in conditions %}
+          <option value="{{ condition }}">{{ condition }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="chat-button">Chat</button>
+    </form>
+    </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function() {
+            // Submit the form and send the selected condition and severity to the chatbot endpoint
+            sendMessage('chatbot', 'Hi, how can I help you?');
+            $('#chat-form').submit(function(e) {
+                e.preventDefault();
+                var condition = $('#condition-select').val();
+                var severity = $('#severity-select').val();
+
+                if (condition && severity) {
+                    sendMessage('user', 'I have a ' + severity + ' ' + condition);
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/chatbot',
+                        data: { 'condition': condition, 'severity': severity },
+                        success: function(response) {
+                            sendMessage('chatbot', response.response);
+                        }
+                    });
+
+                    $('#condition-select').val('');
+                    $('#severity-select').val('');
+                }
+            });
+
+            // Function to display the message on the chat interface
+            function sendMessage(role, content) {
+                var messageClass = (role === 'user') ? 'user-message' : 'chatbot-message';
+                var messageDiv = $('<div>').addClass('message').addClass(messageClass).html(content);
+                $('#user-messages').append(messageDiv);
+                $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+            }
+        });
+    </script>
+</body>
+</html>
